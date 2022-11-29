@@ -1249,7 +1249,7 @@ npm start
 
 Now when you visit public ip:3000 with your web browser, your application will allow you to READ, CREATE, UPDATE, and DELETE tasks.
 
-![ django ](file:///home/rovi91/kbrt3naby6pzcvhntpgr.gif "django")
+![ django ](./kbrt3naby6pzcvhntpgr.gif "django")
 
 
 
