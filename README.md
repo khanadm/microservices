@@ -231,6 +231,201 @@ admin.site.register(Todo, TodoAdmin)
 #### Step 2 — Setting Up the APIs
 
 
+In this section, you will create an API using the Django REST framework.
+
+Install the djangorestframework and django-cors-headers using Pipenv:
+
+
+```sh
+pipenv install djangorestframework django-cors-headers
+```
+
+You need to add rest_framework and corsheaders to the list of installed applications. 
+Open the backend/settings.py file in your code editor and update the INSTALLED_APPS and MIDDLEWARE sections:
+
+
+```sh
+# Application definition
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'corsheaders',
+    'rest_framework',
+    'todo',
+]
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+]
+
+```
+
+Then, add these lines of code to the bottom of the backend/settings.py file:
+
+
+```sh
+CORS_ORIGIN_WHITELIST = [
+     'http://localhost:3000'
+]
+```
+django-cors-headers is a Python library that will prevent the errors that you would normally get due to CORS rules. 
+In the CORS_ORIGIN_WHITELIST code, you whitelisted localhost:3000 because you want the frontend 
+(which will be served on that port) of the application to interact with the API.
+
+
+Creating serializers
+You will need serializers to convert model instances to JSON so that the frontend can work with the received data.
+
+Create a todo/serializers.py file with your code editor.
+Open the serializers.py file and update it with the following lines of code:
+
+```sh
+from rest_framework import serializers
+from .models import Todo
+
+class TodoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Todo
+        fields = ('id', 'title', 'description', 'completed')
+ 
+```
+
+This code specifies the model to work with and the fields to be converted to JSON.
+
+
+#### Creating the View
+
+You will need to create a TodoView class in the todo/views.py file.
+
+Open the todo/views.py file with your code editor and add the following lines of code:
+
+```sh
+from django.shortcuts import render
+from rest_framework import viewsets
+from .serializers import TodoSerializer
+from .models import Todo
+
+# Create your views here.
+
+class TodoView(viewsets.ModelViewSet):
+    serializer_class = TodoSerializer
+    queryset = Todo.objects.all()
+
+```
+
+The viewsets base class provides the implementation for CRUD operations by default. 
+This code specifies the serializer_class and the queryset.
+
+Open the backend/urls.py file with your code editor and replace the contents with the following lines of code:
+
+```sh
+from django.contrib import admin
+from django.urls import path, include
+from rest_framework import routers
+from todo import views
+
+router = routers.DefaultRouter()
+router.register(r'todos', views.TodoView, 'todo')
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('api/', include(router.urls)),
+]
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
