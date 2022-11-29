@@ -2,9 +2,13 @@
 
 
   CONTENTS
+  
   Prerequisites
+  
   Step 1 — Setting Up the Backend
+  
   Step 2 — Setting Up the APIs
+  
   Step 3 — Setting Up the Frontend
 
 
@@ -134,29 +138,97 @@ Before we install our project’s Python requirements, we need to activate the v
   ```
   ![ django ](https://user-images.githubusercontent.com/106643382/204489190-058be87b-85a4-4ea7-b7f5-146b9616bba6.png "django")
 
+  At this point, you will see an instance of a Django application running successfully. 
+  Once you are finished, you can stop the server (CONTROL+C orCTRL+C).
 
-  At this point, you will see an instance of a Django application running successfully. Once you are finished, you can stop the server (CONTROL+C or CTRL+C).
+Registering the todo Application
+Now that you have completed the setup for the backend, you can begin registering 
+the todo application as an installed app so that Django can recognize it.
 
-
-
-
-
-
-
-
+Open the backend/settings.py file in your code editor and add todo to the INSTALLED_APPS:
 
 
+# Application definition
 
 
+```sh
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'todo',
+]
+```
+
+Then, save your changes.
 
 
+Defining the Todo Model
+Let’s create a model to define how the Todo items should be stored in the database.
+
+Open the todo/models.py file in your code editor and add the following lines of code:
+
+```sh
+from django.db import models
+
+# Create your models here.
+
+class Todo(models.Model):
+    title = models.CharField(max_length=120)
+    description = models.TextField()
+    completed = models.BooleanField(default=False)
+
+    def _str_(self):
+        return self.title
+```        
+        
+The code snippet above describes three properties on the Todo model:
+
+-title
+-description
+-completed
 
 
+The completed property is the status of a task. A task will either be completed or not completed at any time. 
+Because you have created a Todo model, you will need to create a migration file:
+
+    
+    
+  ```sh
+  python manage.py makemigrations todo
+  ```
+
+And apply the changes to the database:
+
+  ```sh
+  python manage.py migrate todo
+  ```
+
+You can test to see that CRUD operations work on the Todo model 
+you created by using the admin interface that Django provides by default.
+
+Open the todo/admin.py file with your code editor and add the following lines of code:
 
 
+  
+```sh
+from django.contrib import admin
+from .models import Todo
 
+class TodoAdmin(admin.ModelAdmin):
+    list_display = ('title', 'description', 'completed')
 
+# Register your models here.
 
+admin.site.register(Todo, TodoAdmin)
+```
+  
+---  
+  
+#### Step 2 — Setting Up the APIs
 
 
 
