@@ -829,11 +829,16 @@ export default App;
 
 ```
 
+Save your changes and observe the application in your web browser:
+
+![frontend](https://user-images.githubusercontent.com/106643382/204510054-2c903ee6-6196-4d05-9684-01666271798c.png "frontend")
+
+If you attempt to edit and save a Todo item, you will get an alert displaying the Todo item’s object. 
+Clicking on Save or Delete will perform the respective actions on the Todo item.
 
 
-
-
-
+Note:: Depending on your version of React and Reactstrap, you may experience console errors. 
+At the time of the revision, Warning: Legacy context API has been detected within a strict-mode tree. and Warning: findDOMNode is deprecated in StrictMode. are [known issues](https://github.com/reactstrap/reactstrap/issues/1340)
 
 
 
