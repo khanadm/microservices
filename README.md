@@ -346,60 +346,488 @@ urlpatterns = [
 ```
 
 
+This code specifies the URL path for the API. This was the final step that completes the building of the API.
+
+Step 3 — Setting Up the Frontend
+
+Now that you have the backend of the application complete, you can create the frontend and have it communicate with
+the backend over the interface that you created.
+
+To set up the frontend, this tutorial will rely upon Create React App. 
+There are several approaches to using create-react-app. One approach is to use npx to run the package and create the project:
+
+  ```sh
+  npx create-react-app frontend
+  ```
+
+You can learn more about this approach by reading the [How To Set Up a React Project with Create React App](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-react-project-with-create-react-app)
 
 
+After the project is created, you can change into the newly created frontend directory:
 
 
+  ```sh
+  cd frontend
+  ```
+
+Then, start the application:
+
+   ```sh
+   npm start
+   ```
+Your web browser will open PUBLIC IP:3000 and you will be presented with the default Create React App screen:
+
+![react](https://user-images.githubusercontent.com/106643382/204503770-f1bfe504-e7a2-4bb2-b7bd-24106df14c54.png "react")
+
+Next, install bootstrap and reactstrap to provide user interface tools.
+
+  ```sh
+  npm install bootstrap@4.6.0 reactstrap@8.9.0 --legacy-peer-deps
+  ```
 
 
+#### Note: You may encounter unable to resolve dependency tree errors depending on your versions of React, Bootstrap, and Reactstrap
+#### At the time of the revision, the latest version of popper.js has been deprecated and will conflict with React 17+
 
 
+Open index.js in your code editor and add bootstrap.min.css:
+
+```
+
+import React, { Component } from "react";
+
+const todoItems = [
+  {
+    id: 1,
+    title: "Go to Market",
+    description: "Buy ingredients to prepare dinner",
+    completed: true,
+  },
+  {
+    id: 2,
+    title: "Study",
+    description: "Read Algebra and History textbook for the upcoming test",
+    completed: false,
+  },
+  {
+    id: 3,
+    title: "Sammy's books",
+    description: "Go to library to return Sammy's books",
+    completed: true,
+  },
+  {
+    id: 4,
+    title: "Article",
+    description: "Write article on how to use Django with React",
+    completed: false,
+  },
+];
+
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      viewCompleted: false,
+      todoList: todoItems,
+    };
+  }
+
+  displayCompleted = (status) => {
+    if (status) {
+      return this.setState({ viewCompleted: true });
+    }
+
+    return this.setState({ viewCompleted: false });
+  };
+
+  renderTabList = () => {
+    return (
+      <div className="nav nav-tabs">
+        <span
+          className={this.state.viewCompleted ? "nav-link active" : "nav-link"}
+          onClick={() => this.displayCompleted(true)}
+        >
+          Complete
+        </span>
+        <span
+          className={this.state.viewCompleted ? "nav-link" : "nav-link active"}
+          onClick={() => this.displayCompleted(false)}
+        >
+          Incomplete
+        </span>
+      </div>
+    );
+  };
+
+  renderItems = () => {
+    const { viewCompleted } = this.state;
+    const newItems = this.state.todoList.filter(
+      (item) => item.completed == viewCompleted
+    );
+
+    return newItems.map((item) => (
+      <li
+        key={item.id}
+        className="list-group-item d-flex justify-content-between align-items-center"
+      >
+        <span
+          className={`todo-title mr-2 ${
+            this.state.viewCompleted ? "completed-todo" : ""
+          }`}
+          title={item.description}
+        >
+          {item.title}
+        </span>
+        <span>
+          <button
+            className="btn btn-secondary mr-2"
+          >
+            Edit
+          </button>
+          <button
+            className="btn btn-danger"
+          >
+            Delete
+          </button>
+        </span>
+      </li>
+    ));
+  };
+
+  render() {
+    return (
+      <main className="container">
+        <h1 className="text-white text-uppercase text-center my-4">Todo app</h1>
+        <div className="row">
+          <div className="col-md-6 col-sm-10 mx-auto p-0">
+            <div className="card p-3">
+              <div className="mb-4">
+                <button
+                  className="btn btn-primary"
+                >
+                  Add task
+                </button>
+              </div>
+              {this.renderTabList()}
+              <ul className="list-group list-group-flush border-top-0">
+                {this.renderItems()}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+}
+
+export default App;
+```
+
+This code includes some hardcoded values for four items. These will be temporary values until items are fetched from the backend.
+
+The renderTabList() function renders two spans that help control which set of items are displayed. Clicking on the Completed tab will display the completed tasks. Clicking on the Incomplete tab will display the incomplete tasks.
+
+Save your changes and observe the application in your web browser:
 
 
+![todo app](https://user-images.githubusercontent.com/106643382/204508014-963f0343-7157-489f-bd5e-cea0f8f28a15.png  "todo app")
+
+To handle actions such as adding and editing tasks, you will need to create a modal component.
+
+First, create a components folder in the src directory:
+
+  ```sh
+  mkdir src/components
+  ``` 
+
+Then, create a Modal.js file and open it with your code editor. Add the following lines of code: in frontend/src/components/Modal.js
+
+```
+import React, { Component } from "react";
+import {
+  Button,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Form,
+  FormGroup,
+  Input,
+  Label,
+} from "reactstrap";
+
+export default class CustomModal extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      activeItem: this.props.activeItem,
+    };
+  }
+
+  handleChange = (e) => {
+    let { name, value } = e.target;
+
+    if (e.target.type === "checkbox") {
+      value = e.target.checked;
+    }
+
+    const activeItem = { ...this.state.activeItem, [name]: value };
+
+    this.setState({ activeItem });
+  };
+
+  render() {
+    const { toggle, onSave } = this.props;
+
+    return (
+      <Modal isOpen={true} toggle={toggle}>
+        <ModalHeader toggle={toggle}>Todo Item</ModalHeader>
+        <ModalBody>
+          <Form>
+            <FormGroup>
+              <Label for="todo-title">Title</Label>
+              <Input
+                type="text"
+                id="todo-title"
+                name="title"
+                value={this.state.activeItem.title}
+                onChange={this.handleChange}
+                placeholder="Enter Todo Title"
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label for="todo-description">Description</Label>
+              <Input
+                type="text"
+                id="todo-description"
+                name="description"
+                value={this.state.activeItem.description}
+                onChange={this.handleChange}
+                placeholder="Enter Todo description"
+              />
+            </FormGroup>
+            <FormGroup check>
+              <Label check>
+                <Input
+                  type="checkbox"
+                  name="completed"
+                  checked={this.state.activeItem.completed}
+                  onChange={this.handleChange}
+                />
+                Completed
+              </Label>
+            </FormGroup>
+          </Form>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            color="success"
+            onClick={() => onSave(this.state.activeItem)}
+          >
+            Save
+          </Button>
+        </ModalFooter>
+      </Modal>
+    );
+  }
+}
+
+```
 
 
+This code creates a CustomModal class and it nests the Modal component that is derived from the reactstrap library.
 
+This code also defined three fields in the form:
 
+- title
+- description
+- completed
 
+These are the same fields that we defined as properties on the Todo model in the backend.
 
+The CustomModal receives activeItem, toggle, and onSave as props:
 
+-  activeItem represents the Todo item to be edited.
 
+-  toggle is a function used to control the Modal’s state (i.e., open or close the modal).
 
+- onSave is a function that is called to save the edited values of the Todo item.
 
+Next, you will import the CustomModal component into the App.js file.
 
+Revisit the src/App.js file with your code editor and replace the entire contents with the following lines of code:
 
+```
+import React, { Component } from "react";
+import Modal from "./components/Modal";
 
+const todoItems = [
+  {
+    id: 1,
+    title: "Go to Market",
+    description: "Buy ingredients to prepare dinner",
+    completed: true,
+  },
+  {
+    id: 2,
+    title: "Study",
+    description: "Read Algebra and History textbook for the upcoming test",
+    completed: false,
+  },
+  {
+    id: 3,
+    title: "Sammy's books",
+    description: "Go to library to return Sammy's books",
+    completed: true,
+  },
+  {
+    id: 4,
+    title: "Article",
+    description: "Write article on how to use Django with React",
+    completed: false,
+  },
+];
 
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      viewCompleted: false,
+      todoList: todoItems,
+      modal: false,
+      activeItem: {
+        title: "",
+        description: "",
+        completed: false,
+      },
+    };
+  }
 
+  toggle = () => {
+    this.setState({ modal: !this.state.modal });
+  };
 
+  handleSubmit = (item) => {
+    this.toggle();
 
+    alert("save" + JSON.stringify(item));
+  };
 
+  handleDelete = (item) => {
+    alert("delete" + JSON.stringify(item));
+  };
 
+  createItem = () => {
+    const item = { title: "", description: "", completed: false };
 
+    this.setState({ activeItem: item, modal: !this.state.modal });
+  };
 
+  editItem = (item) => {
+    this.setState({ activeItem: item, modal: !this.state.modal });
+  };
 
+  displayCompleted = (status) => {
+    if (status) {
+      return this.setState({ viewCompleted: true });
+    }
 
+    return this.setState({ viewCompleted: false });
+  };
 
+  renderTabList = () => {
+    return (
+      <div className="nav nav-tabs">
+        <span
+          className={this.state.viewCompleted ? "nav-link active" : "nav-link"}
+          onClick={() => this.displayCompleted(true)}
+        >
+          Complete
+        </span>
+        <span
+          className={this.state.viewCompleted ? "nav-link" : "nav-link active"}
+          onClick={() => this.displayCompleted(false)}
+        >
+          Incomplete
+        </span>
+      </div>
+    );
+  };
 
+  renderItems = () => {
+    const { viewCompleted } = this.state;
+    const newItems = this.state.todoList.filter(
+      (item) => item.completed === viewCompleted
+    );
 
+    return newItems.map((item) => (
+      <li
+        key={item.id}
+        className="list-group-item d-flex justify-content-between align-items-center"
+      >
+        <span
+          className={`todo-title mr-2 ${
+            this.state.viewCompleted ? "completed-todo" : ""
+          }`}
+          title={item.description}
+        >
+          {item.title}
+        </span>
+        <span>
+          <button
+            className="btn btn-secondary mr-2"
+            onClick={() => this.editItem(item)}
+          >
+            Edit
+          </button>
+          <button
+            className="btn btn-danger"
+            onClick={() => this.handleDelete(item)}
+          >
+            Delete
+          </button>
+        </span>
+      </li>
+    ));
+  };
 
+  render() {
+    return (
+      <main className="container">
+        <h1 className="text-white text-uppercase text-center my-4">Todo app</h1>
+        <div className="row">
+          <div className="col-md-6 col-sm-10 mx-auto p-0">
+            <div className="card p-3">
+              <div className="mb-4">
+                <button
+                  className="btn btn-primary"
+                  onClick={this.createItem}
+                >
+                  Add task
+                </button>
+              </div>
+              {this.renderTabList()}
+              <ul className="list-group list-group-flush border-top-0">
+                {this.renderItems()}
+              </ul>
+            </div>
+          </div>
+        </div>
+        {this.state.modal ? (
+          <Modal
+            activeItem={this.state.activeItem}
+            toggle={this.toggle}
+            onSave={this.handleSubmit}
+          />
+        ) : null}
+      </main>
+    );
+  }
+}
 
+export default App;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```
 
 
 
