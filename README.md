@@ -15,9 +15,9 @@
   #### Step 1 — Setting Up the Backend
 
 
-     Install the dependencies to run the Django app.
+  Install the dependencies to run the Django app.
 
-    If you are using Django with Python 3, type:
+  If you are using Django with Python 3, type:
 
   - Firstly, we need to update local apt package index using
 
